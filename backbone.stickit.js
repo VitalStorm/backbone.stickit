@@ -662,7 +662,7 @@
           if(attr instanceof Backbone.Collection){
             return getModelsOfCollection(attr);
           }else if(attr instanceof Backbone.Model){
-            if(_.indexOf(modelRefernceList, attr)){
+            if(_.indexOf(modelRefernceList, attr) > -1){
               return attr.id;
             }else{
               modelRefernceList.push(attr);
@@ -691,7 +691,7 @@
 
         var getModelsOfCollection = function(collection){
           var data = [];
-          collection.each((model)=>{
+          collection.each(function(model){
             data.push(getAttributesOfModel(model));
           });
           return data;

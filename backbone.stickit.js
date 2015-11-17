@@ -37,6 +37,19 @@
     this._handlers = this._handlers.concat(handlers);
   };
 
+  //Stickit deserialization custom type handlers
+  Stickit._deserializationHandlers = [];
+
+  Stickit.addDeserializationHandler = function(objectConstructor, handler) {
+    if(typeof objectConstructor !== 'object'){
+      throw 'First arg must be a constructor.'
+    }
+    Stickit._deserializationHandlers.push({
+      type: objectConstructor,
+      handler: handler
+    });
+  };
+
   // Backbone.View Mixins
   // --------------------
 
@@ -642,7 +655,49 @@
         });
         // Remove collection event listeners once this binding is unstuck
         model.once('stickit:unstuck', removeAllListeners, this);
-        optList = optList.toJSON();
+        //optList = optList.toJSON();
+        var modelRefernceList = [];
+
+        var getModelAttribute = function (attr) {
+          if(attr instanceof Backbone.Collection){
+            return getModelsOfCollection(attr);
+          }else if(attr instanceof Backbone.Model){
+            if(_.indexOf(modelRefernceList, attr)){
+              return attr.id;
+            }else{
+              modelRefernceList.push(attr);
+              return getAttributesOfModel(attr);
+            }
+          }else{
+            var handlerElem = _.find(Stickit._deserializationHandlers, function(elem){
+              return (attr instanceof elem.type);
+            });
+            if(handlerElem){
+              return handlerElem.handler(attr);
+            }else{
+              return attr;
+            }
+          }
+        };
+
+        var getAttributesOfModel = function(model){
+          var data = {};
+          var pairs = model.pairs();
+          for(var i = 0, pLen = pairs.length; i < pLen; i++){
+            data[pairs[i][0]] = getModelAttribute(pairs[i][1]);
+          }
+          return data;
+        };
+
+        var getModelsOfCollection = function(collection){
+          var data = [];
+          collection.each((model)=>{
+            data.push(getAttributesOfModel(model));
+          });
+          return data;
+        }
+
+        optList = getModelsOfCollection(optList);
       }
 
       if (selectConfig.defaultOption) {

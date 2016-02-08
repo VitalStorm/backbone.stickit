@@ -583,6 +583,10 @@
               return true;
             } else if (_.isObject(fieldVal) && _.isEqual(optionVal, fieldVal)) {
               return true;
+            } else if (fieldVal instanceof Backbone.Model){
+              if(_.isObject(optionVal) && fieldVal.id === optionVal.id){
+                return true;
+              }
             }
             return false;
           };
@@ -656,16 +660,16 @@
         // Remove collection event listeners once this binding is unstuck
         model.once('stickit:unstuck', removeAllListeners, this);
         //optList = optList.toJSON();
-        var modelRefernceList = [];
+        var modelReferenceList = [];
 
         var getModelAttribute = function (attr) {
           if(attr instanceof Backbone.Collection){
             return getModelsOfCollection(attr);
           }else if(attr instanceof Backbone.Model){
-            if(_.indexOf(modelRefernceList, attr) > -1){
+            if(_.indexOf(modelReferenceList, attr) > -1){
               return attr.id;
             }else{
-              modelRefernceList.push(attr);
+              modelReferenceList.push(attr);
               return getAttributesOfModel(attr);
             }
           }else{

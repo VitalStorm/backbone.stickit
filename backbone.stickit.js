@@ -662,7 +662,7 @@
         //optList = optList.toJSON();
         var modelReferenceList = [];
 
-        var getModelAttribute = function (attr) {
+        var getModelAttribute = function (attr, options) {
           if(attr instanceof Backbone.Collection){
             return getModelsOfCollection(attr);
           }else if(attr instanceof Backbone.Model){
@@ -684,24 +684,28 @@
           }
         };
 
-        var getAttributesOfModel = function(model){
+        var getAttributesOfModel = function(model, options){
           var data = {};
           var pairs = model.pairs();
           for(var i = 0, pLen = pairs.length; i < pLen; i++){
-            data[pairs[i][0]] = getModelAttribute(pairs[i][1]);
+            data[pairs[i][0]] = getModelAttribute(pairs[i][1], options);
           }
           return data;
         };
 
-        var getModelsOfCollection = function(collection){
+        var getModelsOfCollection = function(collection, options){
           var data = [];
           collection.each(function(model){
-            data.push(getAttributesOfModel(model));
+            if(options && options.useBackboneModels){
+              data.push(model);
+            }else{
+              data.push(getAttributesOfModel(model, options));
+            }
           });
           return data;
-        }
+        };
 
-        optList = getModelsOfCollection(optList);
+        optList = getModelsOfCollection(optList, options);
       }
 
       if (selectConfig.defaultOption) {

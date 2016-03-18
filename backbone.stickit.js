@@ -571,7 +571,11 @@
             val = fieldVal.value,
             disabled = fieldVal.disabled;
           } else {
-            text = evaluatePath(obj, selectConfig.labelPath),
+            if(typeof selectConfig.labelPath === 'function'){
+              text = selectConfig.labelPath(obj);
+            }else{
+              text = evaluatePath(obj, selectConfig.labelPath);
+            }
             val = evaluatePath(obj, selectConfig.valuePath),
             disabled = evaluatePath(obj, selectConfig.disabledPath);
           }
